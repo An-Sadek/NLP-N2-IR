@@ -9,6 +9,8 @@ from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 import string
 from nltk.stem import PorterStemmer
+from nltk.stem import WordNetLemmatizer
+from nltk.corpus import wordnet
 
 
 class Preprocessing:
@@ -19,6 +21,23 @@ class Preprocessing:
         self.digit_pattern = r"\S*\d+\S*"
         self.stemmer = PorterStemmer()
         self.lemmatizer = WordNetLemmatizer()
+
+        self.tag_dict = {
+            "J": wordnet.ADJ,
+            "N": wordnet.NOUN,
+            "V": wordnet.VERB,
+            "R": wordnet.ADV
+        }
+
+    def preprocess_all(self):
+        self.remove_hashtag_username()
+        self.tokenization()
+        self.lower_word()
+        self.remove_punctuation()
+        self.remove_hashtag_username()
+        self.remove_number()
+        self.stemming()
+        self.lemmatization()
 
     def remove_hashtag_username(self):
         self.corpus = [re.sub(self.hashtag_uname_pattern, '', text).strip() for text in self.corpus]
@@ -68,8 +87,15 @@ class Preprocessing:
         ]
 
     def lemmatization(self):
-        
+        self.corpus = [
+            [
+                self.lemmatizer.lemmatize(word, self.get_wordnet_pos(word)) for word in sub_list
+            ] for sub_list in self.corpus
+        ]
 
+    def get_wordnet_pos(self, word):
+        tag = nltk.pos_tag([word])[0][1][0].upper()
+        return self.tag_dict.get(tag, wordnet.NOUN)
     
 if __name__ == "__main__":
     corpus = [
@@ -108,4 +134,8 @@ if __name__ == "__main__":
 
     print("\nStemming")
     pre_tool.stemming()
+    print(pre_tool.corpus)
+
+    print("\nLemming")
+    pre_tool.lemmatization()
     print(pre_tool.corpus)
