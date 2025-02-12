@@ -1,5 +1,7 @@
-import nltk
-nltk.download("words")
+import re
 
-E_dict = nltk.corpus.words.words()
-print(E_dict)
+pattern = r"\S*\d+\S*"
+test = "1234, 54321, A1234, 1234B. Thanh cong"
+
+result = re.sub(pattern, "", test)
+print(result)
