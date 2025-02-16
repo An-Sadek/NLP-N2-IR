@@ -1,7 +1,16 @@
-import re
+class TesetDataset:
 
-pattern = r"\S*\d+\S*"
-test = "1234, 54321, A1234, 1234B. Thanh cong"
+    def __init__(self):
+        pass 
 
-result = re.sub(pattern, "", test)
-print(result)
+    def __len__(self):
+        return 10
+    
+    def __getitem__(self, idx):
+        arr = [i for i in range(10)]
+        return arr[idx]
+    
+
+test = TesetDataset()
+print(len(test))
+print(test[5])
