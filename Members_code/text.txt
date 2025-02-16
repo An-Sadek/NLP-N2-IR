@@ -1,0 +1,107 @@
+The mechanism of pattern recognition in the brain is
+little known, and it seems to be almost impossible to
+reveal it only by conventional physiological experiments. So, we take a slightly different approach to this
+problem. If we could make a neural network model
+which has the same capability for pattern recognition
+as a human being, it would give us a powerful clue to
+the understanding of the neural mechanism in the
+brain. In this paper, we discuss how to synthesize a
+neural network model in order to endow it an ability of
+pattern recognition like a human being.
+Several models were proposed with this intention
+(Rosenblatt, 1962; Kabrisky, 1966; Giebel, 1971;
+Fukushima, 1975). The response of most of these
+models, however, was severely affected by the shift in
+position and/or by the distortion in shape of the input
+patterns. Hence, their ability for pattern recognition
+was not so high.
+In this paper, we propose an improved neural
+network model. The structure of this network has been
+suggested by that of the visual nervous system of the
+vertebrate. This network is self-organized by "learning
+without a teacher", and acquires an ability to recognize
+stimulus patterns based on the geometrical similarity
+(Gestalt) of their shapes without affected by their
+position nor by small distortion of their shapes.
+This network is given a nickname "neocognitron"l,
+because it is a further extention of the "cognitron",
+which also is a self-organizing multilayered neural
+network model proposed by the author before
+(Fukushima, 1975). Incidentally, the conventional
+cognitron also had an ability to recognize patterns, but
+its response was dependent upon the position of the
+stimulus patterns. That is, the same patterns which
+were presented at different positions were taken as
+different patterns by the conventional cognitron. In the
+neocognitron proposed here, however, the response of
+the network is little affected by the position of the
+stimulus patterns.
+1 Preliminary report of the neocognitron already appeared elsewhere (Fukushima, 1979a, b)
+0340-1200/80/0036/0193/$02.00 
+194
+The neocognitron has a multilayered structure, too.
+It also has an ability of unsupervised learning: We do
+not need any "teacher" during the process of selforganization, and it is only needed to present a set of
+stimulus patterns repeatedly to the input layer of the
+network. After completion of self-organization, the
+network acquires a structure similar to the hierarchy
+model of the visual nervous system proposed by Hubel
+and Wiesel (1962, 1965).
+According to the hierarchy model by Hubel and
+Wiesel, the neural network in the visual cortex has a
+hierarchy structure : LGB (lateral geniculate
+body)--*simple cells-.complex cells~lower order hypercomplex cells--*higher order hypercomplex cells. It
+is also suggested that the neural network between
+lower order hypercomplex cells and higher order hypercomplex cells has a structure similar to the network
+between simple cells and complex cells. In this hierarchy, a cell in a higher stage generally has a tendency
+to respond selectively to a more complicated feature of
+the stimulus pattern, and, at the same time, has a larger
+receptive field, and is more insensitive to the shift in
+position of the stimulus pattern.
+It is true that the hierarchy model by Hubel and
+Wiesel does not hold in its original form. In fact, there
+are several experimental data contradictory to the
+hierarchy model, such as monosynaptic connections
+from LGB to complex cells. This would not, however,
+completely deny the hierarchy model, if we consider
+that the hierarchy model represents only the main
+stream of information flow in the visual system. Hence,
+a structure similar to the hierarchy model is introduced
+in our model.
+Hubel and Wiesel do not tell what kind of cells
+exist in the stages higher than hypercomplex cells.
+Some cells in the inferotemporal cortex (i.e. one of the
+association areas) of the monkey, however, are reported to respond selectively to more specific and more
+complicated features than hypercomplex cells (for example, triangles, squares, silhouettes of a monkey's
+hand, etc.), and their responses are scarcely affected by
+the position or the size of the stimuli (Gross et al.,
+1972; Sato et al., 1978). These cells might correspond
+to so-called "grandmother cells".
+Suggested by these physiological data, we extend
+the hierarchy model of Hubel and Wiesel, and hypothesize the existance of a similar hierarchy structure
+even in the stages higher than hypercomplex cells. In
+the extended hierarchy model, the cells in the highest
+stage are supposed to respond only to specific stimulus
+patterns without affected by the position or the size of
+the stimuli.
+The neocognitron proposed here has such an extended hierarchy structure. After completion of selforganization, the response of the cells of the deepest
+layer of our network is dependent only upon the shape
+of the stimulus pattern, and is not affected by the
+position where the pattern is presented. That is, the
+network has an ability of position-invariant patternrecognition.
+In the field of engineering, many methods for
+pattern recognition have ever been proposed, and
+several kinds of optical character readers have already
+been developed. Although such machines are superior
+to the human being in reading speed, they are far
+inferior in the ability of correct recognition. Most of
+the recognition method used for the optical character
+readers are sensitive to the position of the input
+pattern, and it is necessary to normalize the position of
+the input pattern beforehand. It is very difficult to
+normalize the position, however, if the input pattern is
+accompanied with some noise or geometrical distortion. So, it has long been desired to find out an
+algorithm of pattern recognition which can cope with
+the shift in position of the input pattern. The algorithm
+proposed in this paper will give a drastic solution also
+to this problem.
