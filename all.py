@@ -235,8 +235,31 @@ class TextSummarization:
 
 		return summary_text
 	
-	def LexRank(self, text):
+	def LexRank(self, text, n_sentences:int = 3):
+		# 1. Tách câu
 		sentences = sent_tokenize(text)
+
+		# 2. Vector hóa các câu bằng TF-IDF
+		vectorizer = TfidfVectorizer()
+		tfidf_matrix = vectorizer.fit_transform(sentences)
+
+		# 3. Tính ma trận cosine similarity
+		similarity_matrix = cosine_similarity(tfidf_matrix)
+
+		# 4. Xây dựng đồ thị và áp dụng PageRank
+		nx_graph = nx.from_numpy_array(similarity_matrix)
+
+		# 4. Xây dựng đồ thị và áp dụng PageRank
+		graph = nx.from_numpy_array(similarity_matrix)
+		scores = nx.pagerank(graph)
+
+		# 5. Chọn các câu quan trọng nhất
+		ranked_sentences = sorted(((scores[i], sent) for i, sent in enumerate(sentences)), reverse=True)
+		summary = " ".join([sent for _, sent in ranked_sentences[:n_sentences]])
+
+		return summary
+
+
 
 
 
@@ -247,6 +270,7 @@ class SentimentAnalysis:
 
 
 if __name__ == "__main__":
+	"""
 	# NLP preprocessing
 	corpus = ["This is 1st document", "This is 2nd document"]
 	tools = NLP_Preprocessing()
@@ -260,7 +284,7 @@ if __name__ == "__main__":
 	# Dataset preprocessing
 	dataset = SteamDataset("./dataset.csv", n_rows=100)
 	print(dataset[0])
-	print(dataset[-1])
+	print(dataset[-1])"""
 
 	# Text Summarization
 	ts = TextSummarization(path="./text.txt")
@@ -269,3 +293,6 @@ if __name__ == "__main__":
 	text = ts.text
 	print("\n\nLSA")
 	print(ts.LSA(text))
+
+	print("\n\nLexRank")
+	print(ts.LexRank(text))
