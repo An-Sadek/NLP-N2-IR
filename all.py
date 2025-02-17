@@ -86,13 +86,16 @@ class NLP_Preprocessing:
 		]
 
 	# Xoá stopwords, các từ ko mang quá nhiều giá trị
-	def remove_stopwords(self, tokens: Tokens) -> Tokens:
-		return [
-			[
-				word for word in sublist if word not in self.STOPWORDS_SET
-			] 
-			for sublist in tokens
-		]
+	def remove_stopwords(self, tokens: Tokens|Corpus, custom_stopwords: set[str] = None) -> Tokens:
+		stopwords = self.STOPWORDS_SET if custom_stopwords is None else set(custom_stopwords)
+
+		if isinstance(tokens, list) and tokens and isinstance(tokens[0], list):
+			return [
+				[
+					word for word in sublist if word not in stopwords
+				] 
+				for sublist in tokens
+			]
 
 	# Stem
 	def stem(self, tokens: Tokens) -> Tokens:
@@ -259,9 +262,65 @@ class TextSummarization:
 
 		return summary
 
+	# TextRank được tối ưu
+	def TextRank(self, text, n_sentences:int = 3, dim=100, n_iter=50):
+		# Lemmatizer
+		lemmatizer = WordNetLemmatizer()
+		
+		# Process text once
+		sentences = sent_tokenize(text.lower())
+		
+		# More efficient stopwords check
+		custom_stopwords = set(stopwords.words('english')) - {"not", "without"}
+		
+		# Process sentences more efficiently
+		processed_sentences = []
+		for s in sentences:
+			words = [lemmatizer.lemmatize(word) for word in word_tokenize(s) 
+					if word.isalpha() and word not in custom_stopwords]
+			processed_sentences.append(" ".join(words))
 
+		# Load embeddings more efficiently - only load common words
+		word_embeddings = {}
+		common_words = set()
+		for sent in processed_sentences:
+			common_words.update(sent.split())
+			
+		with open("./glove.6B.100d.txt", encoding="utf-8") as f:
+			for line in f:
+				values = line.split()
+				word = values[0]
+				if word in common_words:  # Only load needed embeddings
+					coefs = np.asarray(values[1:], dtype='float32')
+					word_embeddings[word] = coefs
+		
+		# Chuyển đổi câu thành vector bằng cách tính trung bình vector của các từ trong câu.
+		sentence_vectors = []
+		for sentence in processed_sentences:
+			if not sentence:
+				sentence_vectors.append(np.zeros(dim))
+				continue
+			words = sentence.split()
+			word_vectors = [word_embeddings.get(w, np.zeros(dim)) for w in words]
+			sentence_vectors.append(np.mean(word_vectors, axis=0))
+		
+		# Tính ma trận cosine similarity
+		sentence_vectors = np.array(sentence_vectors)
+		sim_mat = cosine_similarity(sentence_vectors)
+		np.fill_diagonal(sim_mat, 0)
+		
+		nx_graph = nx.from_numpy_array(sim_mat)
+		scores = nx.pagerank(nx_graph, max_iter=50)  # Limit max iterations
+		
+		# Sắp xếp các câu theo độ quan trọng
+		ranked_sentences = [(scores[i], s) for i, s in enumerate(sentences)]
+		ranked_sentences.sort(reverse=True)
+		summary = "\n".join(sent for _, sent in ranked_sentences[:n_sentences])
+		
+		return summary
 
-
+	def Bert(self, text, n_sentences:int = 3):
+		pass
 
 class SentimentAnalysis:
 	
@@ -286,9 +345,13 @@ if __name__ == "__main__":
 	print(dataset[0])
 	print(dataset[-1])"""
 
+	# Simple Preprocessing
+	tools = NLP_Preprocessing()
+	corpus = ["This is 1st document", "This is 2nd document"]
+	print(tools.remove_stopwords(corpus))
+
 	# Text Summarization
 	ts = TextSummarization(path="./text.txt")
-	print(ts.text)
 
 	text = ts.text
 	print("\n\nLSA")
@@ -296,3 +359,6 @@ if __name__ == "__main__":
 
 	print("\n\nLexRank")
 	print(ts.LexRank(text))
+
+	print("\n\nTextRank")
+	print(ts.TextRank(text))
