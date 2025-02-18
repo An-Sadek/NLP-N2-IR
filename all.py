@@ -17,6 +17,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import TruncatedSVD
 from sklearn.preprocessing import Normalizer
 from sklearn.pipeline import make_pipeline
+from summarizer import Summarizer
 
 from sklearn.metrics.pairwise import cosine_similarity
 
@@ -320,7 +321,9 @@ class TextSummarization:
 		return summary
 
 	def Bert(self, text, n_sentences:int = 3):
-		pass
+		bert_model = Summarizer()
+		summary = bert_model(text, num_sentences=n_sentences)
+		return summary
 
 class SentimentAnalysis:
 	
@@ -362,3 +365,6 @@ if __name__ == "__main__":
 
 	print("\n\nTextRank")
 	print(ts.TextRank(text))
+
+	print("\n\nBert")
+	print(ts.Bert(text))
