@@ -4,15 +4,18 @@ import numpy as np
 import polars as pl
 import networkx as nx
 
+import matplotlib.pyplot as plt
+import seaborn as sns
+
 import nltk
 import regex as re
 import string
-
 from nltk.tokenize import word_tokenize, sent_tokenize
 from nltk.corpus import stopwords, wordnet
 from nltk.stem import PorterStemmer, WordNetLemmatizer
 from nltk import pos_tag
 
+from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import TruncatedSVD
 from sklearn.preprocessing import Normalizer
@@ -20,6 +23,10 @@ from sklearn.pipeline import make_pipeline
 from summarizer import Summarizer
 
 from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.metrics import confusion_matrix
+
+from sklearn.linear_model import LogisticRegression
+from sklearn.naive_bayes import GaussianNB
 
 Corpus = list[str]
 Tokens = list[list[str]]
@@ -87,16 +94,15 @@ class NLP_Preprocessing:
 		]
 
 	# Xoá stopwords, các từ ko mang quá nhiều giá trị
-	def remove_stopwords(self, tokens: Tokens|Corpus, custom_stopwords: set[str] = None) -> Tokens:
+	def remove_stopwords(self, tokens: Tokens, custom_stopwords: set[str] = None) -> Tokens:
 		stopwords = self.STOPWORDS_SET if custom_stopwords is None else set(custom_stopwords)
 
-		if isinstance(tokens, list) and tokens and isinstance(tokens[0], list):
-			return [
-				[
-					word for word in sublist if word not in stopwords
-				] 
-				for sublist in tokens
-			]
+		return [
+			[
+				word for word in sublist if word not in stopwords
+			] 
+			for sublist in tokens
+		]
 
 	# Stem
 	def stem(self, tokens: Tokens) -> Tokens:
@@ -134,7 +140,7 @@ class NLP_Preprocessing:
 		tokens = self.remove_punctuation(tokens)
 		tokens = self.remove_stopwords(tokens)
 		tokens = self.stem(tokens)
-		tokens = self.lemmatize(tokens)
+		#tokens = self.lemmatize(tokens)
 		return tokens
 
 	# Trả về corpus thay vì token
@@ -177,6 +183,26 @@ class SteamDataset:
 
 	def __getitem__(self, idx):
 		return self.tokens[idx], self.corpus[idx], self.label[idx]
+	
+	def get_cfs_mtx(self, model, train_size=0.8, seed=42):
+		# Use corpus (preprocessed text) instead of tokens for vectorization
+		X_train, X_test, y_train, y_test = train_test_split(self.corpus, self.label, shuffle=True, 
+														random_state=seed, 
+														train_size=train_size)
+		
+		# Create and fit TF-IDF vectorizer
+		vectorizer = TfidfVectorizer()
+		X_train_vec = vectorizer.fit_transform(X_train).toarray()
+		X_test_vec = vectorizer.transform(X_test).toarray()
+
+		# Train and predict
+		model.fit(X_train_vec, y_train)
+		y_pred = model.predict(X_test_vec)
+		return confusion_matrix(y_test, y_pred)
+
+	def plot_cfs_mtx(self, mtx):
+		sns.heatmap(mtx/np.sum(mtx), annot=True)
+		plt.show()
 
 
 class TextSummarization:
@@ -325,11 +351,6 @@ class TextSummarization:
 		summary = bert_model(text, num_sentences=n_sentences)
 		return summary
 
-class SentimentAnalysis:
-	
-	def __init__(self, path: str=None, text: str=None):
-		pass
-
 
 if __name__ == "__main__":
 	"""
@@ -368,3 +389,14 @@ if __name__ == "__main__":
 
 	print("\n\nBert")
 	print(ts.Bert(text))
+
+	# ML-based sentiment analysis
+	dataset = SteamDataset("./dataset.csv", n_rows=100)
+	
+	lr = LogisticRegression()
+	lr_cfs_mtx = dataset.get_cfs_mtx(lr)
+	dataset.plot_cfs_mtx(lr_cfs_mtx)
+
+	nb = GaussianNB()
+	nb_cfs_mtx = dataset.get_cfs_mtx(nb)
+	dataset.plot_cfs_mtx(nb_cfs_mtx)
