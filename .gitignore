@@ -3,3 +3,5 @@ archive.zip
 *.csv
 Members_code/*
 glove.6B.100d.txt
+*.doc
+*.docx

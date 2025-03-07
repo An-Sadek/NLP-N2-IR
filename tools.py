@@ -79,7 +79,7 @@ def preprocess(corpus: list[str]) -> list[list[str]]:
     tokens = remove_punctuation(tokens)
     tokens = remove_stopwords(tokens)
     tokens = stem(tokens)
-    tokens = lemmatize(tokens)
+    #tokens = lemmatize(tokens)
     return tokens
 
 # Trả về corpus thay vì token

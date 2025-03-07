@@ -1,16 +1,19 @@
-class TesetDataset:
+# Load spacy and language
+import spacy
+nlp = spacy.load("en_core_web_sm")
+words = set(nlp.vocab.strings)
 
-    def __init__(self):
-        pass 
+# get string to check
+string = "I am lkjdfosdaj fp9238u4213u4 bankai this is test text"
 
-    def __len__(self):
-        return 10
-    
-    def __getitem__(self, idx):
-        arr = [i for i in range(10)]
-        return arr[idx]
-    
+# check if each word is in the dictionary
+problem_words = []
+for word in string.split():
+    if word not in words:
+        problem_words.append(word)
 
-test = TesetDataset()
-print(len(test))
-print(test[5])
+# print the results
+if problem_words:
+    print("The following words are not in the dictionary:")
+    for word in problem_words:
+        print(word)

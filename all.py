@@ -31,14 +31,16 @@ from sklearn.naive_bayes import GaussianNB
 Corpus = list[str]
 Tokens = list[list[str]]
 
+import spacy
+nlp = spacy.load("en_core_web_sm")
 
 class NLP_Preprocessing:
-
+	
 	def __init__(self):
 		# Regex
-		self.PREFIX_PATTERN = re.compile(r"[#@/]\S+")
+		self.VALID_PATTERN = re.compile(r"[^a-zA-z0-9\s]")
 		self.DIGIT_PATTERN = re.compile(r"\S*\d+\S*")
-
+		
 		self.PUNCTUATION_TRANS = str.maketrans("", "", string.punctuation)
 
 		self.STOPWORDS_SET = set(stopwords.words("english"))
@@ -51,14 +53,16 @@ class NLP_Preprocessing:
 			"R": wordnet.ADV
 		}
 
-	# Xoá prefix như # @ /
-	def remove_hashtag(self, corpus: Corpus) -> Tokens:
+		self.voca = set(nlp.vocab.strings)
+	
+	# Xoá các chuỗi không hợp lệ
+	def remove_invalid(self, corpus: Corpus) -> Corpus:
 		return [
-			self.PREFIX_PATTERN.sub("", sent) for sent in corpus
+			self.VALID_PATTERN.sub("", sent) for sent in corpus
 		]
 
 	# Xoá các số có trong corpus
-	def remove_digit(self, corpus: Tokens) -> Tokens:
+	def remove_digit(self, corpus: Corpus) -> Tokens:
 		return [
 			self.DIGIT_PATTERN.sub("", sent) for sent in corpus
 		]
@@ -68,6 +72,7 @@ class NLP_Preprocessing:
 		return [
 			word_tokenize(sent) for sent in corpus
 		]
+	
 	
 	# Token sentence trong corpus
 	def sentence_tokenize(self, corpus: Corpus) -> Tokens:
@@ -92,7 +97,16 @@ class NLP_Preprocessing:
 			] 
 			for sublist in tokens
 		]
-
+	
+	# Kiểm tra từ điển
+	def check_vocabulary(self, tokens: Tokens)->Tokens:
+		return[
+			[
+				word for word in sublist if word in self.voca
+			] 
+			for sublist in tokens
+		]
+	
 	# Xoá stopwords, các từ ko mang quá nhiều giá trị
 	def remove_stopwords(self, tokens: Tokens, custom_stopwords: set[str] = None) -> Tokens:
 		stopwords = self.STOPWORDS_SET if custom_stopwords is None else set(custom_stopwords)
@@ -133,12 +147,13 @@ class NLP_Preprocessing:
 
 	# Tiền xử lý toàn bộ các phương thức trên
 	def preprocess(self, corpus: Corpus) -> Tokens:
-		corpus = self.remove_hashtag(corpus)
+		corpus = self.remove_invalid(corpus)
 		corpus = self.remove_digit(corpus)
 		tokens = self.tokenize(corpus)
 		tokens = self.lowercase(tokens)
-		tokens = self.remove_punctuation(tokens)
+		tokens = self.check_vocabulary(tokens)
 		tokens = self.remove_stopwords(tokens)
+		tokens = self.remove_punctuation(tokens)
 		tokens = self.stem(tokens)
 		#tokens = self.lemmatize(tokens)
 		return tokens
@@ -353,7 +368,7 @@ class TextSummarization:
 
 
 if __name__ == "__main__":
-	"""
+
 	# NLP preprocessing
 	corpus = ["This is 1st document", "This is 2nd document"]
 	tools = NLP_Preprocessing()
@@ -367,13 +382,14 @@ if __name__ == "__main__":
 	# Dataset preprocessing
 	dataset = SteamDataset("./dataset.csv", n_rows=100)
 	print(dataset[0])
-	print(dataset[-1])"""
+	print(dataset[-1])
 
 	# Simple Preprocessing
 	tools = NLP_Preprocessing()
 	corpus = ["This is 1st document", "This is 2nd document"]
 	print(tools.remove_stopwords(corpus))
 
+	"""
 	# Text Summarization
 	ts = TextSummarization(path="./text.txt")
 
@@ -389,14 +405,4 @@ if __name__ == "__main__":
 
 	print("\n\nBert")
 	print(ts.Bert(text))
-
-	# ML-based sentiment analysis
-	dataset = SteamDataset("./dataset.csv", n_rows=100)
-	
-	lr = LogisticRegression()
-	lr_cfs_mtx = dataset.get_cfs_mtx(lr)
-	dataset.plot_cfs_mtx(lr_cfs_mtx)
-
-	nb = GaussianNB()
-	nb_cfs_mtx = dataset.get_cfs_mtx(nb)
-	dataset.plot_cfs_mtx(nb_cfs_mtx)
+	"""
