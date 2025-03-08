@@ -127,7 +127,7 @@ class NLP_Preprocessing:
 		]
 
 	# Tiền xử lý toàn bộ các phương thức trên
-	def preprocess(self, corpus: Corpus) -> Tokens:
+	def preprocess(self, corpus: Corpus, lemm=False) -> Tokens:
 		corpus = self.remove_invalid(corpus)
 		corpus = self.remove_digit(corpus)
 		tokens = self.tokenize(corpus)
@@ -136,7 +136,10 @@ class NLP_Preprocessing:
 		tokens = self.remove_stopwords(tokens)
 		tokens = self.remove_punctuation(tokens)
 		tokens = self.stem(tokens)
-		#tokens = self.lemmatize(tokens)
+		
+		if lemm:
+			tokens = self.lemmatize(tokens)
+
 		return tokens
 
 	# Trả về corpus thay vì token
