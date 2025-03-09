@@ -6,7 +6,6 @@ from nlp_tools import NLP_Preprocessing
 
 import numpy as np
 import polars as pl
-import networkx as nx
 
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -27,6 +26,10 @@ from sklearn.cluster import KMeans
 class SteamDataset:
 
 	def __init__(self, path, n_rows=100, seed=42, lemm=False):
+		"""
+		Steam dataset có khoảng 4 500 000 dòng
+		Để lemm = True để thực hiện lemm
+		"""
 		assert os.path.exists(path), f"File không tồn tại: {path}"
 		assert n_rows % 2 == 0, "n_rows phải chia hết cho 2"
 
@@ -107,7 +110,6 @@ if __name__ == "__main__":
 	lr1_cfs_mtx = data.get_cfs_mtx(lr1, vectorizer=bow_vectorizer)
 	lr1_cfs_mtx = np.where(lr1_cfs_mtx >= 0.5, 1, 0)
 	data.plot_cfs_mtx(lr1_cfs_mtx)
-
 
 	# TF-IDF
 	tfidf_vectorizer = TfidfVectorizer()
